@@ -132,7 +132,8 @@
   padding: 16px;
   border-radius: 16px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
-  width: min(420px, 100%);
+  width: 100%;
+  max-width: 720px;
   word-break: break-word;
   overflow-wrap: anywhere;
   text-align: left;
