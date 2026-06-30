@@ -227,5 +227,3 @@ Total: ~2,535,524 tokens
 
 
 ---
-
-**Rapport généré:** 30 Juin 2026
