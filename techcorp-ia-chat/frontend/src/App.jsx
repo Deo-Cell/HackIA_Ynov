@@ -1,11 +1,23 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import TextInput from './textInput.jsx'
 import ChatBox from './chatBox.jsx'
 import './App.css'
 
+const SUGGESTIONS = [
+  "What is a P/E ratio?",
+  "Explain hedge funds",
+  "How to read a balance sheet?",
+  "What is diversification?",
+]
+
 function App() {
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
+  const chatEndRef = useRef(null)
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, loading])
 
   function extractText(value) {
     if (value == null) return null
@@ -24,7 +36,6 @@ function App() {
       }
       if ('data' in value) return extractText(value.data)
       if ('output' in value) return extractText(value.output)
-
       const nested = Object.values(value).map(extractText).filter(Boolean)
       return nested.length ? nested.join('\n') : JSON.stringify(value, null, 2)
     }
@@ -34,11 +45,9 @@ function App() {
   async function handleSend(text) {
     if (!text.trim()) return
 
-    // add user message immediately
     const userMessage = { id: Date.now(), sender: 'user', text: text.trim() }
-    setMessages((prevMessages) => [...prevMessages, userMessage])
+    setMessages((prev) => [...prev, userMessage])
 
-    // send to API
     setLoading(true)
     try {
       const apiUrl = import.meta.env.VITE_API_URL || '/api/chat'
@@ -74,33 +83,67 @@ function App() {
   }
 
   return (
-    <>
-      <div className="mainContent">
-        <h3>TechCorp Chat Bot</h3>
+    <div className="app">
+      <aside className="sidebar">
+        <div className="sidebar-header">
+          <div className="sidebar-logo">TC</div>
+          <span className="sidebar-title">TechCorp AI</span>
+        </div>
+
+        <div className="sidebar-status">
+          <span className="status-dot"></span>
+          Modèle connecté
+        </div>
+
+        <div className="sidebar-info">
+          <strong>Phi-3.5 Financial</strong>
+          Assistant spécialisé en finance, investissements et analyse financière.
+        </div>
+      </aside>
+
+      <main className="mainContent">
+        <div className="chat-header">
+          <h3>Financial Assistant</h3>
+          <span className="chat-header-badge">Phi-3.5</span>
+        </div>
 
         {messages.length === 0 ? (
           <div className="emptyState">
-            <p>Commencez la conversation en envoyant votre premier message.</p>
+            <div className="emptyState-icon">💹</div>
+            <h4>Comment puis-je vous aider ?</h4>
+            <p>Posez vos questions sur la finance, les investissements, le trading ou l'analyse financière.</p>
+            <div className="suggestions">
+              {SUGGESTIONS.map((s) => (
+                <button key={s} className="suggestion-chip" onClick={() => handleSend(s)}>
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
-          <>
-            <div className="chatList">
-              {messages.map((message) => (
-                <ChatBox key={message.id} sender={message.sender} text={message.text} />
-              ))}
-              {loading && (
-                <div className="loadingStatus">
-                  <div className="spinner loadingSpinner" aria-hidden="true" />
-                  <p>En cours...</p>
+          <div className="chatList">
+            {messages.map((message) => (
+              <ChatBox key={message.id} sender={message.sender} text={message.text} />
+            ))}
+            {loading && (
+              <div className="loadingStatus">
+                <div className="typing-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
                 </div>
-              )}
-            </div>
-          </>
+                <p>Analyse en cours...</p>
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
         )}
-      </div>
 
-      <TextInput onSubmit={handleSend} disabled={loading} />
-    </>
+        <div className="input-area">
+          <TextInput onSubmit={handleSend} disabled={loading} />
+        </div>
+      </main>
+    </div>
   )
 }
 

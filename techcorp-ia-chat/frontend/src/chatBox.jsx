@@ -13,17 +13,9 @@ function ChatBox({ sender, text }) {
       }
 
       if (match[1].startsWith('**')) {
-        parts.push(
-          <strong key={parts.length}>
-            {match[2]}
-          </strong>
-        )
+        parts.push(<strong key={parts.length}>{match[2]}</strong>)
       } else {
-        parts.push(
-          <em key={parts.length}>
-            {match[3]}
-          </em>
-        )
+        parts.push(<em key={parts.length}>{match[3]}</em>)
       }
 
       lastIndex = match.index + match[0].length
@@ -38,6 +30,9 @@ function ChatBox({ sender, text }) {
 
   return (
     <div className={`chatBox ${sender}`}>
+      <div className="message-label">
+        {sender === 'user' ? 'Vous' : 'TechCorp AI'}
+      </div>
       <p>{renderMarkdown(text)}</p>
     </div>
   )
